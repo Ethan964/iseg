@@ -1,0 +1,145 @@
+---
+title: 'Time-Series: Homework 01'
+author: 'me'
+date: '09-29-2026'
+format:
+  pdf:
+    toc: true
+    documentclass: article
+    number-sections: true
+    geometry:
+      - top=30mm
+      - left=20mm
+---
+
+**Due October 12, 2026**
+
+# Question 01
+
+Consider the consump.RData from the Wooldridge library in R for this exercise.
+
+
+## Question (i)
+
+Esimate a simple regression model relating the growth in real per capita consumption *gc* (where ${gc}_t = log(c_t) - log(c_{t-1})$) (of nondurables and services) to the growth in real per capita disonsable income $gy$ (where ${gy}_t = log(y_t) - log(y_{t-1})$). Interpret the equation and discuss statistical significance.
+
+### Answer
+
+## Question (ii)
+
+Add a lag of the growth in real per capita disposable income to the equation from part (i). What do you conclude about adjustment lags in consumption growth?
+
+### Answer
+
+## Question (iii)
+
+Add the real interest rate $r3$ to the equation in part (i), where $r3$ is the (ex post) real interest rate as measured by the return on three-,month T-bill rates: $r3_t = i3_t - {inf}_t$, where the inflation rate is based on the Consumer Price Index (cpi). Does it affect consumption growth?
+
+### Answer
+
+## Question (iiii)
+
+For each regressions in (i), (ii), and (iii), plot the residuals, say $\hat{u}_t$, and their squares, $\hat{u}_t^2$, and compute the correlation between $\hat{u}_t$ and $\hat{u}_{t-j}$, and between $\hat{u}^2$ and $\hat{u}_{t-j}^2$, $j = 1,2,3,4,5.$ What do you conlude regarding Assumptions 4 and 5 seen in the lector L0_Introduction (the homoscedasticity and no serial correlation assumptions)?
+
+### Answer
+
+# Exercise 02
+
+Suppose you estimate the following model by ordinary least squares:
+
+$y_t = \alpha + \beta_0 x_t + \beta_1 x_{t-1} + \beta_2 x_{t-2} + u_t$
+
+and obtain the following output.
+
+**Coefficients**
+
+| x | Estimate | Std. Error | t value | Pr(> |t|) |
+| ---- | --- | --- | --- | --- |
+| (intercept) | 0.0011 | 0.0118 | 0.09 | 0.928 |
+| x | 0.20 | 0.06 | 3.33 | 0.001 |
+| x_l1 | 0.14 | 0.06 | 2.33 | 0.021 |
+| x_l2 | 0.05 | 0.05 | 1.00 | 0.318 |
+
+Assume the sample has $n = 300$ observations ( after accounting for lags) and that large-sample normal critical values can be used for t tests.
+
+## Question (i)
+
+What is the name of this mode, and what is its order?
+
+### Answer
+
+## Question (ii)
+
+Interpret the estimate of  $\beta_0$.
+
+### Answer
+
+## Question (iii)
+
+Suppose $x$ increases by one unit temporarily in period $t$ and then returns to its original level. Trace the estimated effect on $y$ in periods $t$, $t+1$, $t+2$, and $t+3$.
+
+### Answer
+
+## Question (iv)
+
+Suppose instead $x$ increase by one unit *permanently* from period $t$ onwards. What is the estimated effect on $y$ in periods $t$, $t+1$, $t+2$, and $t+3$? What is the long-run propensity (LRP)?
+
+### Answer
+
+## Question (v)
+
+Test $H_0: \beta_2 = 0$ against $H_1: \beta_2 ≠ 0$ at the 5% significance level.
+
+### Answer
+
+## Question (vi)
+
+Test $H_0: \beta_0 = 0.1$ against $H_1: \beta_0 > 0.1$ at the 5% significance level. Would your conclusion change if the alternative were two-sided?
+
+### Answer
+
+## Question (vii)
+
+Explain why you cannot compute the standard error of the LRP from the output above alone.
+
+### Answer
+
+## Question (viii)
+
+You are told that $Cov(\hat{\beta_0}, \hat{\beta_1}) = -0.0010$, $Cov(\hat{\beta_0}, \hat{\beta_2}) = -0.0005$, $Cov(\hat{\beta_1}, \hat{\beta_2}) = -0.0010$. Compute the standard error of the LRP and test $H_0: LRP = 0$ against a two-sided alternative at the 5% level.
+
+### Answer
+
+## Question (xi)
+
+Construct a 95% confidence interval for the LRP. Is a long-run effect equal to 1 (full pass-through) consistent with the data? See slide 20 from Lecture4.pdf in the folder recap.
+
+### Answer
+
+## Question (x)
+
+Show how to rewrite the model so that the LRP and its standard error can be obtained directly from a single regression.
+
+### Answer
+
+## Question (xi)
+
+The $R^2$ of the model is above 0.35. The $R^2$ from regressing $y_t$ on $x_t$ only (using the same sample) is 0.30. Test $H_0: \beta_1 = \beta_2 = 0$ at the 5% significance level.
+
+### Answer
+
+## Question (xii)
+
+Why must the restricted and unrestricted regressions in part (xi) be estimated on the same sample?
+
+### Answer
+
+## Question (xiii)
+
+The coefficient $\beta_2$ is individually insignificant, yet the lags of $x$ are jointly significant and the LRP is estimated fairly and precisely. Explain how this can happen.
+
+### Answer
+
+## Question (xiv)
+
+State the key assumption needed for OLS to be unbiased in this model, and give an example of how it could fail.
