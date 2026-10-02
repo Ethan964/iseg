@@ -21,7 +21,7 @@ Consider the consump.RData from the Wooldridge library in R for this exercise.
 
 ## Question (i)
 
-Esimate a simple regression model relating the growth in real per capita consumption *gc* (where ${gc}_t = log(c_t) - log(c_{t-1})$) (of nondurables and services) to the growth in real per capita disonsable income $gy$ (where ${gy}_t = log(y_t) - log(y_{t-1})$). Interpret the equation and discuss statistical significance.
+Estimate a simple regression model relating the growth in real per capita consumption *gc* (where ${gc}_t = log(c_t) - log(c_{t-1})$) (of nondurables and services) to the growth in real per capita disonsable income $gy$ (where ${gy}_t = log(y_t) - log(y_{t-1})$). Interpret the equation and discuss statistical significance.
 
 ### Answer
 
@@ -143,3 +143,175 @@ The coefficient $\beta_2$ is individually insignificant, yet the lags of $x$ are
 ## Question (xiv)
 
 State the key assumption needed for OLS to be unbiased in this model, and give an example of how it could fail.
+
+### Answer
+
+## Question (xv)
+
+If $v_t$ is serially correlated, what are the consequences for the results above, and what would you do about it?
+
+### Answer
+
+## Question (xvi)
+
+How would you decide whether to include $x_{t-3}$ in the model?
+
+### Answer
+
+# Exercise 3
+
+This exercise uses the hseinv.RData and barium.RData datasets from the Wooldrige library in R.
+
+*Part A: Trends.* The dataset hseinv contains annual data on housing investment
+and housing prices int eh US for 1947-1988. The variable *inv* is real housing
+investment, *pop* is the population, *invpc = inv/pc* is real per capita housing
+investment (in thousands of dollars) and *price* is a housing price index
+(equal to 1 in 1982). The dataset also contains the logs of these variables
+(*linv, lpop, linvpc, lprice*) and the lagged log price, *lprice_1*. Let
+$t=1,2,3...,42$ denote the linear time trend.
+
+## Question (i)
+
+Estimate the model log($invpc_t$) = $\beta_0 + \beta_1 log(price_t) + u_t$. Interpret the esimtate of $\beta_1$ and discuss its statistical significance.
+
+### Answer
+
+## Question (ii)
+
+Add the linear time trend $t$ to the model i (i). What happens to the estimated elasticity of housing investment with respect to price? Interpret the coefficient on $t$.
+
+### Answer
+
+## Question (iii)
+
+Regress log($invpc_t$) on $t$, and log($price_t%) on t (each with an intercept). What do you conclude? Use your results to explain why the estimate in (i) may be misleading
+
+### Answer
+
+## Question (iv)
+
+Detrend log($invpc_t$) and log($price_t$) by saving the residuals from the two regressions in (iii). Regress the detrended log($invpc_t$) on the detrended log($price_t$). Compare the slope estimate with the one (ii) and explain the result.
+
+### Answer
+
+## Question (v)
+
+Compare the $R^2$ from (ii) with the $R^2$ from regressing the detrended log($invpc_t$) on log($price_t$) and $t$. Which is a better measure of how much of the variation in housing investment is explained by price? Why?
+
+### Answer
+
+## Question (vi)
+
+Consider now the finite distributed lag model with a linear trend:
+
+$log(invpc_t) = \beta_0 + \beta_1 log(price_t) + \beta_2 log(price_{t-1}) + \delta t + u_t
+
+Estimate the model and comment on the individual estimates of $\beta_1$ and $\beta_2$. Compute the long-run propensity (LRP) of housing investment with respect to price and test $H_0: LRP = 0$ at the 5% level, by rewriting the model so that the LRP and it standard error are obtained directly from a single regression. Compare the estimated LRP with the one obtained from the same model without the trend.
+
+### Answer
+
+## Question (vii)
+
+Add a quadratic trend to the model in (vi), centering the trend before squaring $\tilde{t} = t - \bar{t}$. Is the quadratic term needed? What happens to the estimated LRP?
+
+### Answer
+
+## Question (viii)
+
+Instead of working with per capita investment, estimate:
+
+$log(invpc_t) = \gamma_0 + \gamma_1 log(price_t) + \gamma_2 log(pop_t) + \delta t + e_t$.
+
+Explain why $\gamma_2 = 1$ corresponds to the per capita model in (ii), and test $H_0: \gamma_2 = 1$ at the 5% level. Compute the correlation between $log(pop_t)$ and $t$ and use it to comment on the precision of $\hat{\gamma_2}$. Repeat the test without trend: what do you conclude?
+
+*Part B: Seasonality.* the dataset barium contains monthly data from February 1978 to December 1988 on imports of barium chloride from China (*chnimp), a chemical production index (*chempi*), the volume of gasoline production (*gas*), and an exchange rate index (*rtwex*). The dummy variable *befile6*, *affile6*, and *afdec6* equal one in the six months before an antidumping petition was filed, the six months after it was filed, and the six months after the final decision, respectively. The dummies *feb, mar,.., dec* indicate the month of the year.
+
+## Question (ix)
+
+Estimate the model
+$log(chnimp_t) = \beta_0 + \beta_1 log(chempi_t) + \beta_2 log(gas_t) + \beta_3 log(rtwex_t) + \beta_4 befile6_t + \beta_5 affile6_t + \beta_6 afdec6_t + \delta_1 feb_t + \delta_2 mar_t + ... + \delta_11 dec_t + u_t.
+
+Interpret the esimtate of $\delta_1$ (the coefficient on feb). Why is there no dummy variable for January?
+
+### Answer
+
+## Question (x)
+
+Test whether the onthly dummies are jointly significant at the 5% level. Is there evidence of seasonality in imports of barium chloride from China?
+
+### Answer
+
+## Question (xi)
+
+Add a linear time trend $t$ to the model in (ix). What happens to the estimated coefficient on $log(chempi_t)$? How do you explain this?
+
+### Answer
+
+# Exercise 4
+
+This exercise uses the traffic2.RData dataset from the Wooldrige library in R. It contains monthly data on traffic accidents in California from January 1981 to December 1989 (n = 108), which are not seasonally adjusted. the variable *totacc* is the total number of accidents in the month, *ltoacc = log(totacc)*, $t$ is a linear time trend, *feb,.., dec* are the monthly dummies, *wkends* is the number of weekend days in the month, *unem* is the state employment rate (in %), *spdlaw* equals one from May 1987, when the speed limit on rural highways was raised to 65 mph, and *beltlaw* equals one from January 1986, when a law making seat belts use compulsory came into effect.
+
+## Question (i)
+
+Plot *totacc* and log(totacc) against time and describe what you see. Then estimate
+
+$log(totacc_t) = \beta_0 + \alpha t + \delta_1 feb_t + \delta_2 mar_t + ... + \delta_11 dec_t + u_t,
+
+where January is the base category. Interpret $\hat{\alpha}$, both as a monthly and as annual growth rate.
+
+### Answer
+
+## Question (ii)
+
+Test whether the monthly dummies are jointly significant at the 5% level. In which months are there most accidents, relative to January?
+
+### Answer
+
+## Question (iii)
+
+Re-estimate the model in (i) with December as the base category (use relevel()). Which esimtates change and which do not? How is the coefficient on January in this regression related to the coefficient on December in (i)?
+
+### Answer
+
+## Question (iv)
+
+Plot the residuals from the model in (i) against $t$. Then add a quadratic trend, centering the trend before squaring $(\~{t} = t - \bar{t})$. Is the quadratic term needed? What patterns remains in the residuals, and what might explain it?
+
+### Answer
+
+## Question (v)
+
+Add wkends, unem, spdlaw, and beltlaw to the model in (i). Interpret the coefficients on spdlaw and beltlaw (compute the exact percentage effects) and on unem. What happens to the estimated trend coefficient, and why?
+
+### Answer
+
+## Question (vi)
+
+Partial out the trend and the monthly dummies: regress $log(totacc_t), wkends_t, unem_t, spdlaw_t, and beltlaw_t$ each on an intercept, t and the eleven monthly dummies, and save the residuals. Regress the residuals of $log(totacc_t)$ on the residuals of the four other variables (keeping the intercept). Compare the coefficients, standard errors and $R_2$ with those in (v), and explain the differences.
+
+### Answer
+
+## Question (vii)
+
+Construct a seasonality adjusted version of $log(totacc_t)$ by subtracting the estimated monthly effects from the model in (i), keeping the trend. Plot it together with the original series.
+
+### Answer
+
+## Question (viii)
+
+An alternative way of removing seasonality is seasonal differencing, $\Delta_12 log(totacc_t) = log(totacc_1) - log(totacc_{t-12})$. How many observations are lost? Compute the sample mean of $\Delta_12 log(totacc_t)$ and compare it with $12 \hat{\alpha})$ from (i). Show that the sample mean of $\Delta_12 log(totacc_t)$ depends only on the first and last year of data, and use this to explain the difference.
+
+### Answer
+
+## Question (ix)
+
+Apply the Hodrick-Prescott filter to the seasonally adjusted series from (vii), using the conventional monthly value $\lambda = 129600$ and also $\lambda = 1000$ (package mFilter). Compare the two HP cycles with the residuals from regressing the seasonally adjusted series on an interpcet and t (compute their standard deviations and their correlations). What do you conclude about the choice of $\lambda$?
+
+### Answer
+
+## Question (x)
+
+The accident data used here are not seasonally adjusted. Explain why this matters for the analysis above, and what could go wrong if you instead used an officially seasonally adjusted series together with monthly dummies.
+
+### Answer
+
