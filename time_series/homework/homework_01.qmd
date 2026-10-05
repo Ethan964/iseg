@@ -18,12 +18,30 @@ format:
 
 Consider the consump.RData from the Wooldridge library in R for this exercise.
 
+```{r}
+
+# install.packages('wooldridge')
+library(wooldridge)
+
+data('consump')
+
+```
+
 
 ## Question (i)
 
-Estimate a simple regression model relating the growth in real per capita consumption *gc* (where ${gc}_t = log(c_t) - log(c_{t-1})$) (of nondurables and services) to the growth in real per capita disonsable income $gy$ (where ${gy}_t = log(y_t) - log(y_{t-1})$). Interpret the equation and discuss statistical significance.
+Estimate a simple regression model relating the growth in real per capita consumption *gc* (where ${gc}_t = log(c_t) - log(c_{t-1})$) (of nondurables and services) to the growth in real per capita disposable income *gy* (where ${gy}_t = log(y_t) - log(y_{t-1})$). Interpret the equation and discuss statistical significance.
 
 ### Answer
+
+```{r}
+
+model <- lm(gc ~ gy, data=consump)
+summary(model)
+
+```
+
+When regressing  in real per capita disposable income, *gy*, on growth in real per capita consumption, *gc*, we are given the equation $gc = 0.570781 gy + 0.008079$. This euqations tells us that every increase of 0.570791 in growth in real per capita disposable income, is associated with an predicted increase of 1 in growth in real per capita consumption. As both the intercept and slope of gy have extremely small p-values (>0.001), we have sufficient evidence to show that these are statistically significant predictors of *gy*. Additionally, we have a R-squared value of 0.6787, which signifies that the models variables are able to explain 67.87% of the variation, which is decent for a naive model like this.
 
 ## Question (ii)
 
@@ -31,17 +49,79 @@ Add a lag of the growth in real per capita disposable income to the equation fro
 
 ### Answer
 
+```{r}
+
+model2 <- lm(gc ~ gy + gy_1, data=consump)
+summary(model2)
+
+```
+
+After refitting the model from (i) with a lag of growth in real per capita disposable income, we can conclude that the lag is statistically insignificant. First, the p-value of the lag variable is well above (0.05), meaning it is statistically insignificant. Secondly, there is no improvement to the R-squared, which for a model as simple as this, the added complexity is not worth the trade-off. We can conclude that there are no statistically significant adjustment lags in consumption growth. Once we have the current income growth, the previous year's income growth is not indicative for current consumption growth.
+
 ## Question (iii)
 
-Add the real interest rate $r3$ to the equation in part (i), where $r3$ is the (ex post) real interest rate as measured by the return on three-,month T-bill rates: $r3_t = i3_t - {inf}_t$, where the inflation rate is based on the Consumer Price Index (cpi). Does it affect consumption growth?
+Add the real interest rate $r3$ to the equation in part (i), where $r3$ is the (ex post) real interest rate as measured by the return on three-month T-bill rates: $r3_t = i3_t - {inf}_t$, where the inflation rate is based on the Consumer Price Index (cpi). Does it affect consumption growth?
 
 ### Answer
+
+```{r}
+
+model3 <- lm(gc ~ gy + r3, data=consump)
+summary(model3)
+
+```
+
+From model_3 where we regress gy and r3 onto gr. Our covariate gy remains statistically significant, but our new covariate r3, real interest rate, has a p-value of 0.733. This is an extremely high value, larger than the threshold of 0.005 and thus makes it not statistically significant. There is not a statistically significant relationship between gc and the real interest rate and does not affect consumption growth.
 
 ## Question (iiii)
 
-For each regressions in (i), (ii), and (iii), plot the residuals, say $\hat{u}_t$, and their squares, $\hat{u}_t^2$, and compute the correlation between $\hat{u}_t$ and $\hat{u}_{t-j}$, and between $\hat{u}^2$ and $\hat{u}_{t-j}^2$, $j = 1,2,3,4,5.$ What do you conlude regarding Assumptions 4 and 5 seen in the lector L0_Introduction (the homoscedasticity and no serial correlation assumptions)?
+For each regressions in (i), (ii), and (iii), plot the residuals, say $\hat{u}_t$, and their squares, $\hat{u}_t^2$, and compute the correlation between $\hat{u}_t$ and $\hat{u}_{t-j}$, and between $\hat{u}^2$ and $\hat{u}_{t-j}^2$, $j = 1,2,3,4,5.$ What do you conclude regarding Assumptions 4 and 5 seen in the lecture L0_Introduction (the homoscedasticity and no serial correlation assumptions)?
 
 ### Answer
+
+```{r}
+
+
+# plottin resids. + resid. squared 
+u1 = resid(model)
+u2 = resid(model2)
+u3 = resid(model3)
+
+u1_sq = u1^2
+u2_sq = u2^2
+u3_sq = u3^2
+
+par(mfrow=c(2,3))
+
+plot(u1, type='l', col='darkred', main='Model 1: u_t', ylab='Residuals', xlab='time')
+plot(u2, type='l', col='darkred', main='Model 2: u_t', ylab='Residuals', xlab='time')
+plot(u3, type='l', col='darkred', main='Model 3: u_t', ylab='Residuals', xlab='time')
+
+plot(u1_sq, type='blue', main='Model 1: u^2_t', ylab = 'Squared Residuals', xlab='time')
+plot(u2_sq, type='blue', main='Model 2: u^2_t', ylab = 'Squared Residuals', xlab='time')
+plot(u3_sq, type='blue', main='Model 3: u^2_t', ylab = 'Squared Residuals', xlab='time')
+
+par(mfrow=c(1,1))
+print('')
+print('model 1 correlations')
+print(acf(u1, lag.max=5, plot=FALSE)$acf[2:6])
+print(acf(u1_sq, lag.max=5, plot=FALSE)$acf[2:6])
+print('')
+print('model 2 correlations')
+print(acf(u2, lag.max=5, plot=FALSE)$acf[2:6])
+print(acf(u3_sq, lag.max=5, plot=FALSE)$acf[2:6])
+print('')
+print('model 3 correlations')
+print(acf(u3, lag.max=5, plot=FALSE)$acf[2:6])
+print(acf(u3_sq, lag.max=5, plot=FALSE)$acf[2:6])
+
+
+
+```
+
+Regarding the fourth assumption of homoscedasticity, we assume that there is no correlation between residuals. To verify this assumption, we can observe the plots of each models residuals and see if the behavior of the residuals are consistent (linear) or random. As all residuals of the three models exude random behaviors, trend lines going up and down randomly, we can verify assumption 4 holds up in all three models. 
+
+Assumption 5 of no serial correlation holds if the residuals of a model hover over a certain magnitude for prolonged periods or have a cycical nature. But as we have fairly random, dispersed residuals, we can verify this assumption holds in all three models. 
 
 # Exercise 02
 
@@ -64,15 +144,19 @@ Assume the sample has $n = 300$ observations ( after accounting for lags) and th
 
 ## Question (i)
 
-What is the name of this mode, and what is its order?
+What is the name of this model, and what is its order?
 
 ### Answer
+
+This model is a distributed lag model that is of order 2. This is from the nature of the model having x_t and then two subsequent lag variables based on x_t. 
 
 ## Question (ii)
 
-Interpret the estimate of  $\beta_0$.
+Interpret the estimate of $\beta_0$.
 
 ### Answer
+
+$\beta_0$ is 0.20, which means for every one-unit increase in $x_t$, there is a 0.20 increase in $y_t$.
 
 ## Question (iii)
 
@@ -80,15 +164,39 @@ Suppose $x$ increases by one unit temporarily in period $t$ and then returns to 
 
 ### Answer
 
++ In period $t$: The change in $y_t$ is driven from $\beta_0$ which is 0.2.
+
++ In period $t-1$: The change is now from the first lag $x_{t-1}$, which $\beta_1$ is 0.14.
+
++ In period $t-2$: The change is now from the second lag $x_{t-2}$, which $\beta_2$ is 0.05. 
+
++ Period $t-3$: The period of change has passed the maximum lag of the model. So the effect on $y_{t-3}$ is 0.
+ 
 ## Question (iv)
 
 Suppose instead $x$ increase by one unit *permanently* from period $t$ onwards. What is the estimated effect on $y$ in periods $t$, $t+1$, $t+2$, and $t+3$? What is the long-run propensity (LRP)?
 
 ### Answer
 
+To calculate the LRP of a one-unit increase in the varying periods of time can be calculated as such:
+
++ Period $t: \beta_0 = 0.20$
+
++ Period $t+1 = \beta_0 + \beta_1 = 0.20 + 0.14 = 0.34$
+
++ Period $t+2 = \beta_0 + \beta_1 + \beta_2 = 0.20 + 0.14 + 0.05 = 0.39$
+
++ Period $t+3 = \beta_0 + \beta_1 + \beta_2 = 0.20 + 0.14 + 0.05 = 0.39$
+
+Period $t+3$ and $t+2$ are identical because our model has order of 2, meaning there is no difference in $t+2$ and $t+3$. 
+
 ## Question (v)
 
 Test $H_0: \beta_2 = 0$ against $H_1: \beta_2 ≠ 0$ at the 5% significance level.
+
+To test this hypothesis we can use the p-values from the coefficients table above. At a 5% significance level, the p-value of a covariate must be below 0.05 to give us sufficient evidence to reject the null hypothesis.
+
+The p-value of $\beta_2 = 0.318$. This is too large of a value, thus not giving us sufficient evidence to reject the null hypothesis. 
 
 ### Answer
 
@@ -98,11 +206,27 @@ Test $H_0: \beta_0 = 0.1$ against $H_1: \beta_0 > 0.1$ at the 5% significance le
 
 ### Answer
 
+To test this hypothesis, we have to calculate the t-stat and compare it with the threshold of a 5% signficance level. 
+
+For a one-sided test, we have to plug in our coefficients into this equation:
+
+$t = (\hat{\beta_0} - H_0) / se(\hat{\beta_0})$.
+
+After plugging in values:
+
+$t = (0.20 - 0.10) / 0.06 = 1.667$.
+
+The t-crit value for a 95% confidence level is 1.645. As the t-stat we calculated is greater than the t-crit value, we have sufficient evidence to reject the null hypothesis.
+
+If this test were two-sided, our t-crit value would increase and could become greater than our t-stat. This would not give us sufficient evidence to reject the null hypothesis.
+
 ## Question (vii)
 
 Explain why you cannot compute the standard error of the LRP from the output above alone.
 
 ### Answer
+
+We cannot compute the standard error of the LRP because the table doesn't provide us with a covariances matrix that we need. To calculate the standard error, we need not only the variances of each random variable, but also their covariances.
 
 ## Question (viii)
 
@@ -110,11 +234,33 @@ You are told that $Cov(\hat{\beta_0}, \hat{\beta_1}) = -0.0010$, $Cov(\hat{\beta
 
 ### Answer
 
+$SE = \sqrt{Var(LRP)}$
+
+$Var(LRP) = 0.06^2 + 0.06^2 + 0.05^2 + 2(-0.0010) + 2(-0.0005) + 2(-0.0010)$
+
+$Var(LRP) = 0.0097 - 0.0050 = 0.0047$.
+
+$SE = \sqrt{0.0047} = 0.0686$.
+
+To test the hypothesis we calculate the t-stat for the LRP (0.39). 
+
+$t = (0.39 - 0) / 0.0686 = 5.69$
+
+At a 5% significance level of a two-sided test, the t-crit value is 1.96. We can say that the t-stat of 5.69 is larger than the t-crit value of 1.96, thus giving us sufficient evidence to reject the null hypothesis. 
+
 ## Question (xi)
 
 Construct a 95% confidence interval for the LRP. Is a long-run effect equal to 1 (full pass-through) consistent with the data? See slide 20 from Lecture4.pdf in the folder recap.
 
 ### Answer
+
+$ CI = LRP \pm (1.96 * SE(LRP))$
+
+$ 1.96 * 0.0686 = 0.1345$
+
+$ 0.39 - 0.1345 = 0.2555, 0.39 + 0.1345 = 0.5245$
+
+The 95% CI for the LRP is (0.2555, 0.5245). As the proposed long-run effect of 1 is well outside of our confidence interval, we have sufficient evidence to reject the null hypothesis that LRP = 1. 
 
 ## Question (x)
 
@@ -122,11 +268,39 @@ Show how to rewrite the model so that the LRP and its standard error can be obta
 
 ### Answer
 
+To rewrite the model so that the LRP and its standard error can be obtained from a single regression, we start by assigning the LRP to $\theta$.
+
+$\theta = \beta_0 + \beta_1 + \beta_2$.
+
+Then we re-arange the model to solve for $\beta_0$. 
+
+$ \beta_0 = \theta - \beta_1 + \beta_2 $.
+
+Then we substitute this new definition of $\beta_0$ into the initial regression equation. 
+
+$y_t = \alpha + (\theta - \beta_1 + \beta_2)x_t + \beta_1 x_{t-1} + \beta_2 x_{t-2} + u_t $
+
+Finally we can distribute the variables inside the parenthesis and factor out common terms. 
+
+$ y_t = \alpha + \theta x_t - \beta_1 x_t - \beta_2 x_t + \beta_1 x_{t-1} + \beta_2 x_{t-2} + u_t $ -> $y_t = \alpha + \theta x_t + \beta_1 (x_{t-1} - x_t) + \beta_2 (x_{t-2} - x_t) + u_t $.
+
 ## Question (xi)
 
 The $R^2$ of the model is above 0.35. The $R^2$ from regressing $y_t$ on $x_t$ only (using the same sample) is 0.30. Test $H_0: \beta_1 = \beta_2 = 0$ at the 5% significance level.
 
 ### Answer
+
+$H_0: \beta_1 = \beta_2 = 0 $
+$H_A:$ At least one of the lags is not equal to zero.
+
+| Metric | Unrestricted $R^2$ | Restricted $R^2$ | Number of Restrictions | n | k | degrees of freedom | 
+|------| ----- | ----- | ----- | ----- | ----- | ----- | 
+| Value | 0.35 | 0.30 | 2 | 300 | 3 | 296 | 
+
+$F = \frac{0.05/2} {0.65/296}$
+$F = \frac{0.025}{0.002196} = 11.38$
+
+For a 5% significance level, with $df_1 = 2, df_2 = 296$, the f-crit value is 3.00. As the f-stat we calculated is 11.38 and larger than 3.00, we have sufficient evidence to reject the null hypothesis. We can conclude that the lags are jointly significant at the 5% level.
 
 ## Question (xii)
 
@@ -134,11 +308,15 @@ Why must the restricted and unrestricted regressions in part (xi) be estimated o
 
 ### Answer
 
+The restricted ad unrestricted regressions in part (xi) be estimated on the same sample because when we are calculating f-stats and other values for hypothesis testing, these values are extremely sensitive to differences in sample size, degrees of freedom etc.
+
 ## Question (xiii)
 
 The coefficient $\beta_2$ is individually insignificant, yet the lags of $x$ are jointly significant and the LRP is estimated fairly and precisely. Explain how this can happen.
 
 ### Answer
+
+The coefficient $\beta_2$ can be individually insignificant, but both lags of $x$ are jointly significant because of multicollinearity. When we test the joint significance of two variables, they could often have high correlation with one another. If we found one to be independently significant and one to not be, once combined they could both be jointly significant. 
 
 ## Question (xiv)
 
@@ -146,17 +324,24 @@ State the key assumption needed for OLS to be unbiased in this model, and give a
 
 ### Answer
 
+The key assumption needed for OLS to be unbiased in this model is the rule of exogeneity. This means the expectation of error terms given x must be equal to 0. Error terms must not be connected to variables in any way. One way the assumption and thus the model fails is when the error term is directly correlated with the x variable of a model. This results in a model showing off endogeneity. 
+
+
 ## Question (xv)
 
 If $v_t$ is serially correlated, what are the consequences for the results above, and what would you do about it?
 
 ### Answer
 
+If any covariates are serially correlated, this affects how reliable our statistical tests are. If this assumption is violated, this OLS model is not the BLUE model. To combat this issue you can sometimes include a lagged variable as an independent variable. Sometimes it could work by including more than one lag depending on the scope of the serial correlation.
+
 ## Question (xvi)
 
 How would you decide whether to include $x_{t-3}$ in the model?
 
 ### Answer
+
+I would base my decision on keeping or omitting $x_{t-3}$ in the model by the statistical significance it has on predicting the target variable, while also understanding how it affect the residuals in the model. If it shows any signs of being serially correlated, statistically insignificance, or contributing to violating any of the OLS assumptions, I would have to omit $x_{t-3}$. 
 
 # Exercise 3
 
@@ -170,11 +355,26 @@ investment (in thousands of dollars) and *price* is a housing price index
 (*linv, lpop, linvpc, lprice*) and the lagged log price, *lprice_1*. Let
 $t=1,2,3...,42$ denote the linear time trend.
 
+```{r}
+
+data('hseinv')
+
+```
+
 ## Question (i)
 
-Estimate the model log($invpc_t$) = $\beta_0 + \beta_1 log(price_t) + u_t$. Interpret the esimtate of $\beta_1$ and discuss its statistical significance.
+Estimate the model $log(invpc_t) =  \beta_0 + \beta_1 log(price_t) + u_t$. Interpret the estimate of $\beta_1$ and discuss its statistical significance.
 
 ### Answer
+
+```{r}
+
+hse_model <- lm(linvpc ~ lprice, data=hseinv)
+summary(hse_model)
+
+```
+$\beta_1$ as a slope of 1.24094, which means every one-unit increase in lprice is associated with a 1.24094 increase in linvpc. As lprice has a p-value of 0.00238, it is statistically significant at a 5% level of significance. The only drawback is that it's significance does not hold up at a 1% level of significance. 
+
 
 ## Question (ii)
 
@@ -182,11 +382,32 @@ Add the linear time trend $t$ to the model i (i). What happens to the estimated 
 
 ### Answer
 
+```{r}
+
+hse_timed_model <- lm(linvpc ~ lprice + t, data=hseinv)
+summary(hse_timed_model)
+
+```
+
+After adding in a linear time trend to this model we can see that it drastically changes the significance of the model's covariates. Housing price immediately loses it's significance and the time trend gains a significance at a 10% level. The elasticity of housing investment with respect to price drops drastically. From the model summary output, the time trend says that over time, housing investment per capita will grow 0.98% YoY.
+
 ## Question (iii)
 
-Regress log($invpc_t$) on $t$, and log($price_t%) on t (each with an intercept). What do you conclude? Use your results to explain why the estimate in (i) may be misleading
+Regress log($invpc_t$) on $t$, and log($price_t$) on $t$ (each with an intercept). What do you conclude? Use your results to explain why the estimate in (i) may be misleading
 
 ### Answer
+
+```{r}
+
+hse_model_t2 <- lm(linvpc ~ t, data=hseinv)
+hse_model_t3 <- lm(lprice ~ t, data=hseinv)
+
+summary(hse_model_t2)
+summary(hse_model_t3)
+
+```
+
+From our two models, regressing both linvpc & lprice on t, we see similar behavior with our lone covariates. Both lprice and linvpc are shown to have significance at 1% levels, with differing amounts of $R^2$ values and F-Stats. These show how the estimate in (i) may be misleading, because both variables have strong, linear relationships over time. When we regress both variables for time, the model mistakenly thinks that this shared upward movement, either linvpc or lprice with time, is evidence for a causal relationship. But we know that this can be an easy example of spurious regression.
 
 ## Question (iv)
 
@@ -194,27 +415,108 @@ Detrend log($invpc_t$) and log($price_t$) by saving the residuals from the two r
 
 ### Answer
 
+```{r}
+
+hse_timed_model
+slope_hse_timed_model <- coef(hse_timed_model)['lprice']
+
+res_linvpc <- residuals(lm(linvpc ~ t, data=hseinv))
+res_lprice <- residuals(lm(lprice ~ t, data=hseinv))
+
+model_detrended <- lm(res_linvpc ~ res_lprice)
+slope_detrended <- coef(model_detrended)['res_lprice']
+
+cat('Slope estimate from part (ii): ', slope_hse_timed_model, '\n')
+cat('Slope estimate from detrended model: ', slope_detrended, '\n')
+
+```
+
+After detrending and regressing linvpc on lprice, we see that the slope estimates for each model are identical to one another. This is because in the hse_timed_model, we manually entered in t as a constant variable. In the detrended model, we save the residuals and then model res_linvpc on res_lprice, which accomplishes the same result as the first model. Adding in a time trend and manually detrending variables are two different ways of completing the same goal.
+
 ## Question (v)
 
 Compare the $R^2$ from (ii) with the $R^2$ from regressing the detrended log($invpc_t$) on log($price_t$) and $t$. Which is a better measure of how much of the variation in housing investment is explained by price? Why?
 
 ### Answer
 
+```{r}
+
+cat('r-squared of part (ii) model: ', summary(hse_timed_model)$r.squared, '\n')
+cat('r-squared of detrended model: ', summary(model_detrended)$r.squared, '\n')
+
+
+```
+
+The first model from part (ii) has a much higher r-squared value than the detrended model, 34.07% vs 0.8%. But the question of which r-squared is a better measure of the variation cannot be fully answered with just these two metrics. As r-squared is dividing the unexplained variation by total variation, we have two model operating on different amount of total variation. The first model from part (ii) has a massive amount of SST with all our factors including our linear t variable. Our detrended model measures much more consistent and smaller variations than the first, leading to smaller SST value. So on the surface, the model from part (ii) has a higher, inflated r-squared, but is misleading. Our detrended model's r-squared is a much more realistic representation of capturing variation. 
+
+
 ## Question (vi)
 
 Consider now the finite distributed lag model with a linear trend:
 
-$log(invpc_t) = \beta_0 + \beta_1 log(price_t) + \beta_2 log(price_{t-1}) + \delta t + u_t
+$log(invpc_t) = \beta_0 + \beta_1 log(price_t) + \beta_2 log(price_{t-1}) + \delta t + u_t $
 
 Estimate the model and comment on the individual estimates of $\beta_1$ and $\beta_2$. Compute the long-run propensity (LRP) of housing investment with respect to price and test $H_0: LRP = 0$ at the 5% level, by rewriting the model so that the LRP and it standard error are obtained directly from a single regression. Compare the estimated LRP with the one obtained from the same model without the trend.
 
 ### Answer
+
+```{r}
+
+# fdl portion
+
+hseinv <- hseinv[order(hseinv$t),]
+hseinv$lprice_lag1 <- c(NA, hseinv$lprice[-nrow(hseinv)])
+
+fdl_model <- lm(linvpc ~ lprice + lprice_lag1 + t, data=hseinv)
+summary(fdl_model)
+
+# lrp portion
+model_lrp_trend <- lm(linvpc ~ lprice + gprice + t, data=hseinv)
+model_lrp_detrended <- lm(linvpc ~ lprice + gprice, data=hseinv)
+
+summary_trend     <- summary(model_lrp_trend)$coefficients
+summary_detrended <- summary(model_lrp_detrended)$coefficients
+
+lrp_trend_val  <- summary_trend['lprice', 'Estimate']
+lrp_trend_pval <- summary_trend['lprice', 'Pr(>|t|)']
+
+lrp_detrend_val  <- summary_detrended['lprice', 'Estimate']
+lrp_detrend_pval <- summary_detrended['lprice', 'Pr(>|t|)']
+
+cat('Trend Model     -> LRP: ', lrp_trend_val,   ' | p-value: ', lrp_trend_pval,  '\n')
+cat('Detrended Model -> LRP: ', lrp_detrend_val, ' | p-value: ', lrp_detrend_pval, '\n')
+
+
+```
+
+On our finite distributed lag model, we can see both $\beta_1$ & $\beta_2$ hold significance at the 1% and 0.1% level respectively. But they have differing impacts. lprice has a positive relationship in predicting linvpc, but lprice_lag1 has a negative relationship in predicting linvpc. 
+
+When rewriting the model to calculate the LRP, we get a similar model summary where all of our variables show a significance of at least 5%. 
+
+**Without trend**: Without the trend, the estimated LRP is 1.007 with a small p-value of 0.0089. This p-value is less than 0.05, thus giving us sufficient evidence to reject the null hypothesis. 
+
+**With trend**: With the trend, the estimated LRP is -1.227 with a p-value of 0.0386. This p-value is smaller than 0.05, thus giving us sufficient evidence to reject the null hypothesis. There is sufficient evidence to suggest that the LRP of housing investment in respect to price is different from 0. 
+
+I believe that the difference between the detrended and regular models highlights the possibility of spurious regression between these relationships. When you don't include a trend variable, the model believes that price takes on the entire relationship between U.S housing investment. As both eventuallly increase with time, the model believes that they cause each other to increase without explicitly understanding the impact of time on these two variables.
 
 ## Question (vii)
 
 Add a quadratic trend to the model in (vi), centering the trend before squaring $\tilde{t} = t - \bar{t}$. Is the quadratic term needed? What happens to the estimated LRP?
 
 ### Answer
+
+```{r}
+
+t_bar <- mean(hseinv$t)
+hseinv$t_centered <- hseinv$t - t_bar
+hseinv$t_centered_sq <- (hseinv$t_centered)^2
+
+quadratic_model <- lm(linvpc ~ lprice + gprice + t_centered + t_centered_sq, data=hseinv)
+summary(quadratic_model)
+
+```
+
+After adding in a quadratic term to this model, we can see the LRP increase a substantial amount and keep its significance. The quadratic term is statistically significant sporting a extremely small p-value. The LRP increasing means the addition of the quadratic terms seemed to help the existing variables more accurately capture the behavior of linvpc.  
 
 ## Question (viii)
 
@@ -224,28 +526,85 @@ $log(invpc_t) = \gamma_0 + \gamma_1 log(price_t) + \gamma_2 log(pop_t) + \delta 
 
 Explain why $\gamma_2 = 1$ corresponds to the per capita model in (ii), and test $H_0: \gamma_2 = 1$ at the 5% level. Compute the correlation between $log(pop_t)$ and $t$ and use it to comment on the precision of $\hat{\gamma_2}$. Repeat the test without trend: what do you conclude?
 
+### Answer
+
+```{r}
+
+pop_hse_model <- lm(linv ~ lprice + lpop + t, data=hseinv)
+summary(pop_hse_model)
+
+pop_trend_corr <- cor(hseinv$pop, hseinv$t)
+cat('corr between lpop & t: ', pop_trend_corr, '\n')
+
+pop_hse_model_no_trend <- lm(linv ~ lprice + lpop, data=hseinv)
+summary(pop_hse_model_no_trend)
+
+```
+
+$\gamma_2$ corresponds with our per capita model in part (ii) because if we set $\gamma_2 = 1$, we are essentially perfectly scaling our housing investment variable with population growth by 1%.
+
+When testing our hypothesis of whether $\gamma_2 = 1$, we look to the p-value of lpop in our model's summary. As the p-value of lpop in our model is fairly large, 0.926, we do not have sufficient evidence to reject the null hypothesis.
+
+As the correlation of lpop and t is 0.9982974, this is evidence of near perfect multicollinearity. As population increases steadily over time, the model cannot distinguish between changes in population and time passing. This will artificially inflate some performance metrics like precision and make them misleading. 
+
+After eliminating the trend variable, we can see two of our variables jump in significance as our model has to learn from the behaviors of population as a proxy of time and not working together in unison. As the time trend variable is not included, although some performance metrics like r-squared remain consistent, it poses as a much more accurate and transparent model for predicting linv than a model which has a trend variable included.
+
 *Part B: Seasonality.* the dataset barium contains monthly data from February 1978 to December 1988 on imports of barium chloride from China (*chnimp), a chemical production index (*chempi*), the volume of gasoline production (*gas*), and an exchange rate index (*rtwex*). The dummy variable *befile6*, *affile6*, and *afdec6* equal one in the six months before an antidumping petition was filed, the six months after it was filed, and the six months after the final decision, respectively. The dummies *feb, mar,.., dec* indicate the month of the year.
 
 ## Question (ix)
 
 Estimate the model
-$log(chnimp_t) = \beta_0 + \beta_1 log(chempi_t) + \beta_2 log(gas_t) + \beta_3 log(rtwex_t) + \beta_4 befile6_t + \beta_5 affile6_t + \beta_6 afdec6_t + \delta_1 feb_t + \delta_2 mar_t + ... + \delta_11 dec_t + u_t.
+$log(chnimp_t) = \beta_0 + \beta_1 log(chempi_t) + \beta_2 log(gas_t) + \beta_3 log(rtwex_t) + \beta_4 befile6_t + \beta_5 affile6_t + \beta_6 afdec6_t + \delta_1 feb_t + \delta_2 mar_t + ... + \delta_{11} dec_t + u_t$.
 
-Interpret the esimtate of $\delta_1$ (the coefficient on feb). Why is there no dummy variable for January?
+Interpret the estimtate of $\delta_1$ (the coefficient on feb). Why is there no dummy variable for January?
 
 ### Answer
+
+
+```{r}
+
+data(barium)
+
+barium_model <- lm(lchnimp ~ lchempi + lgas + lrtwex + befile6 + affile6 + afdec6 + feb + mar + apr + may + jun + jul + aug + sep + oct + nov + dec, data=barium)
+
+summary(barium_model)
+
+```
+
+The coefficient of $\delta_1$ is -0.417709, meaning if the month of the observation is Feb., there is an association of -0.417709 of the predicted amount of lchnimp.
+
+There is no dummy for January because we have included dummy variables for 11 months already, we cannot include one for January because that would cause perfect multicollinearity for our model. Having the 12 month dummy variables in a model would cause for the months to always add up to one and would cause our model to be misguided.
 
 ## Question (x)
 
-Test whether the onthly dummies are jointly significant at the 5% level. Is there evidence of seasonality in imports of barium chloride from China?
+Test whether the monthly dummies are jointly significant at the 5% level. Is there evidence of seasonality in imports of barium chloride from China?
 
 ### Answer
+
+```{r}
+
+barium_model_no_dummies <- lm(lchnimp ~ lchempi + lgas + lrtwex + befile6 + affile6 + afdec6, data=barium)
+
+anova(barium_model, barium_model_no_dummies)
+
+```
+
+To test joint significance for the monthly dummies, we can conduct an ANOVA test between our full model and an abbreviated model without monthly dummy variables. As the p-value for the ANOVA test is large, 0.5852, we do not have sufficient evidence to reject the null hypothesis. The monthly variables are not jointly significant and therefore suggests there is no evidence of monthly seasonality in the imports of barium chloride from China.
 
 ## Question (xi)
 
 Add a linear time trend $t$ to the model in (ix). What happens to the estimated coefficient on $log(chempi_t)$? How do you explain this?
 
 ### Answer
+
+```{r}
+
+barium_timed_model <- lm(lchnimp ~ lchempi + lgas + lrtwex + befile6 + affile6 + afdec6 + feb + mar + apr + may + jun + jul + aug + sep + oct + nov + dec + t, data=barium)
+summary(barium_timed_model)
+
+```
+
+Once adding in a linear time trend to the model, we can see the p-value of lchempi rise and become insignificant at every level shown in the model summary. It goes from an extremely small value to 0.72310. This can be caused from removing the underlying growth that certain variables can experience if their behavior is too linear. This is one way to spot and attempt to prevent spurious regression between two variables that are unrelated, but share general behavior characteristics. 
 
 # Exercise 4
 
@@ -255,11 +614,39 @@ This exercise uses the traffic2.RData dataset from the Wooldrige library in R. I
 
 Plot *totacc* and log(totacc) against time and describe what you see. Then estimate
 
-$log(totacc_t) = \beta_0 + \alpha t + \delta_1 feb_t + \delta_2 mar_t + ... + \delta_11 dec_t + u_t,
+$log(totacc_t) = \beta_0 + \alpha t + \delta_1 feb_t + \delta_2 mar_t + ... + \delta_11 dec_t + u_t$,
 
 where January is the base category. Interpret $\hat{\alpha}$, both as a monthly and as annual growth rate.
 
 ### Answer
+
+```{r}
+
+data("traffic2") # not seasonally adjusted, n = 108
+
+plot(
+  traffic2$t, 
+  traffic2$totacc, 
+  type='l', 
+  main='total accidents over time', 
+  ylab='total accidents',
+  xlab='time (months)'
+)
+
+plot(traffic2$t,
+     traffic2$ltotacc,
+     type='l',
+     main='total accidents over time (logged)',
+     ylab='log of total accidents',
+     xlab='time (months)',
+)
+
+log_accident_model <- lm(ltotacc ~ feb + mar + apr + may + jun + jul + aug + sep + oct + nov + dec + t, data=traffic2)
+summary(log_accident_model)
+
+```
+
+From our model predicting the log of total accidents over time, our linear time trend $t$ has shown a significance from an extremely small p-value of 0.00. To find a monthly growth rate we can multiply the coefficient of $\alpha$ by 100, which comes out to $\alpha_{monthly}$ = 0.274%. For the annual growth rate, we then multiply the monthly rate by 12 to get $\alpha_{annual}$ = 3.288%.
 
 ## Question (ii)
 
@@ -267,17 +654,85 @@ Test whether the monthly dummies are jointly significant at the 5% level. In whi
 
 ### Answer
 
+```{r}
+
+accident_model_with_dummies <- lm(ltotacc ~ feb + mar + apr + may + jun + jul + aug + sep + oct + nov + dec + t, data=traffic2)
+accident_model_without_dummies <- lm(ltotacc ~ t, data=traffic2)
+anova(accident_model_with_dummies, accident_model_without_dummies)
+summary(accident_model_with_dummies)
+
+```
+
+From conducting an ANOVA test on both models, one with dummies and one without, we can see that there is significant seasonality from an extremely small p-value of 2.712e-06. After confirmation, we can see that in the model summary that there is significance in the months of March, August, October, November, and December. Worth noting that the majority of these months occur within Winter.
+
 ## Question (iii)
 
-Re-estimate the model in (i) with December as the base category (use relevel()). Which esimtates change and which do not? How is the coefficient on January in this regression related to the coefficient on December in (i)?
+Re-estimate the model in (i) with December as the base category (use relevel()). Which estimates change and which do not? How is the coefficient on January in this regression related to the coefficient on December in (i)?
 
 ### Answer
+
+```{r}
+
+
+traffic2$month <- 'jan'
+
+traffic2$month[traffic2$feb == 1] <- 'feb'
+traffic2$month[traffic2$mar == 1] <- 'mar'
+traffic2$month[traffic2$apr == 1] <- 'apr'
+traffic2$month[traffic2$may == 1] <- 'may'
+traffic2$month[traffic2$jun == 1] <- 'jun'
+traffic2$month[traffic2$jul == 1] <- 'jul'
+traffic2$month[traffic2$aug == 1] <- 'aug'
+traffic2$month[traffic2$sep == 1] <- 'sep'
+traffic2$month[traffic2$oct == 1] <- 'oct'
+traffic2$month[traffic2$nov == 1] <- 'nov'
+traffic2$month[traffic2$dec == 1] <- 'dec'
+
+traffic2$month <- as.factor(traffic2$month)
+traffic2$month <- relevel(traffic2$month, ref = 'dec')
+
+summary(accident_model_dec <- lm(ltotacc ~ month + t, data=traffic2))
+
+```
+
+After releveling the months to set December as the base category, we can see several months preceding December lose their significance, most notably October and November. The months that don't drastically change are those after like January and February. The December and January coefficients are nearly identical to one another. They both have extremely small p-values, and therefore signiicances. They also have around the same slopes and standard errors meaning both months exude the same total accident behaviors. 
 
 ## Question (iv)
 
-Plot the residuals from the model in (i) against $t$. Then add a quadratic trend, centering the trend before squaring $(\~{t} = t - \bar{t})$. Is the quadratic term needed? What patterns remains in the residuals, and what might explain it?
+Plot the residuals from the model in (i) against $t$. Then add a quadratic trend, centering the trend before squaring $(\tilde{t} = t - \bar{t})$. Is the quadratic term needed? What patterns remains in the residuals, and what might explain it?
 
 ### Answer
+
+```{r}
+
+accident_model_resid <- resid(log_accident_model)
+
+plot(traffic2$t,
+     accident_model_resid,
+     ylab='Residuals',
+     xlab='Time (Months)',
+     main='Total Accident Residuals'
+)
+
+traffic_t_bar <- mean(traffic2$t) 
+traffic2$t_centered <- traffic2$t - traffic_t_bar
+traffic2$t_centered_sq <- (traffic2$t_centered)^2
+
+summary(quadratic_traffic_model <- lm(ltotacc ~ feb + mar + apr + may + jun + jul + aug + sep + oct + nov + dec + t + t_centered_sq, data=traffic2))
+
+quadratic_traffic_model_residuals <- resid(quadratic_traffic_model)
+
+plot(traffic2$t,
+     quadratic_traffic_model_residuals,
+     ylab='Residuals',
+     xlab='Time (Months)',
+     main='Total Accident Residuals w/ quadratic'
+)
+
+```
+ 
+The quadratic term is not needed for the model as the p-value for t_centered_sq gives an extremely high p-value. As for our residual plots, we can see a clear fourier behavior going on that does not get improved on when adding in a quadratic term. There is an obvious amount of seasonality that was proven to be significant when we ran ANOVA tests during part (ii).
+
 
 ## Question (v)
 
@@ -285,11 +740,38 @@ Add wkends, unem, spdlaw, and beltlaw to the model in (i). Interpret the coeffic
 
 ### Answer
 
+```{r}
+
+summary(inclusive_traffic_model <- lm(ltotacc ~ feb + mar + apr + may + jun + jul + aug + sep + oct + nov + dec + t + wkends + unem + spdlaw + beltlaw, data=traffic2))
+
+```
+
+Once adding in these four additional covariates, we can see our models power jump a significant amount. Out of the four new factors, only weekends has shown to not be significant in ltotacc. For spdlaw and beltlaw, the coefficients are -0.0537593 and 0.0954528 respectively. These mean that ceteris paribus observations occurring after May 1987 is associated with a 5.38% decrease in total monthly traffic accidents, while observations occurring after January 1986 is associated with a 9.55% increase in total monthly traffic accidents. 
+
+
 ## Question (vi)
 
-Partial out the trend and the monthly dummies: regress $log(totacc_t), wkends_t, unem_t, spdlaw_t, and beltlaw_t$ each on an intercept, t and the eleven monthly dummies, and save the residuals. Regress the residuals of $log(totacc_t)$ on the residuals of the four other variables (keeping the intercept). Compare the coefficients, standard errors and $R_2$ with those in (v), and explain the differences.
+Partial out the trend and the monthly dummies: regress $log(totacc_t), wkends_t, unem_t, spdlaw_t$ and $beltlaw_t$ each on an intercept, t and the eleven monthly dummies, and save the residuals. Regress the residuals of $log(totacc_t)$ on the residuals of the four other variables (keeping the intercept). Compare the coefficients, standard errors and $R^2$ with those in (v), and explain the differences.
 
 ### Answer
+
+```{r}
+
+ltotacc_resi <- resid(log_acc_model <- lm(ltotacc ~ t + feb + mar + apr + may + jun + jul + aug + sep + oct + nov + dec, data=traffic2))
+
+weekend_resid <- resid(weekend_model <- lm(wkends ~ t + feb + mar + apr + may + jun + jul + aug + sep + oct + nov + dec, data=traffic2))
+
+unem_resid <- resid(unem_model <- lm(unem  ~ t + feb + mar + apr + may + jun + jul + aug + sep + oct + nov + dec, data=traffic2))
+
+spdlaw_resid <- resid(spdlaw_model <- lm(spdlaw  ~ t + feb + mar + apr + may + jun + jul + aug + sep + oct + nov + dec, data=traffic2))
+
+beltlaw_resid <- resid(beltlaw_model <- lm(beltlaw  ~ t + feb + mar + apr + may + jun + jul + aug + sep + oct + nov + dec, data=traffic2))
+
+summary(ltotacc_resid_model <- lm(ltotacc_resi ~ weekend_resid + unem_resid + spdlaw_resid + beltlaw_resid))
+
+```
+
+After regressing ltotacc on the residuals of the four aforementioned variables, we have two similar looking model summaries, with each sporting several differences. To begin each of the three variables that are shown to be significant are remaining significant in our residual linear model, with weekends being still the only lone insignificant variable. When the residuals were regressed against ltotacc, we see a both lower p-values, equating to more significance, and extremely low standard error. This shows the reduced volatility that our four variables have when modeling on their residuals instead of their raw, initial values. The largest difference between the two models' performance is their r-squared. Our first model (v) has an impressive r-squared of 0.9101, signifying extremely good performance in capturing the behavior of ltotacc, but when comparing with our residual boosted model, we can see a drastic drop in r-squared, 0.5576. Signifying that we are being mislead and possibly capturing a portion of spurious regression. 
 
 ## Question (vii)
 
@@ -297,9 +779,15 @@ Construct a seasonality adjusted version of $log(totacc_t)$ by subtracting the e
 
 ### Answer
 
+```{r}
+
+?traffic2
+
+```
+
 ## Question (viii)
 
-An alternative way of removing seasonality is seasonal differencing, $\Delta_12 log(totacc_t) = log(totacc_1) - log(totacc_{t-12})$. How many observations are lost? Compute the sample mean of $\Delta_12 log(totacc_t)$ and compare it with $12 \hat{\alpha})$ from (i). Show that the sample mean of $\Delta_12 log(totacc_t)$ depends only on the first and last year of data, and use this to explain the difference.
+An alternative way of removing seasonality is seasonal differencing, $\Delta_{12} log(totacc_t) = log(totacc_1) - log(totacc_{t-12})$. How many observations are lost? Compute the sample mean of $\Delta_{12} log(totacc_t)$ and compare it with $12 \hat{\alpha}$ from (i). Show that the sample mean of $\Delta_{12} log(totacc_t)$ depends only on the first and last year of data, and use this to explain the difference.
 
 ### Answer
 
