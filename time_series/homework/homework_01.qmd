@@ -781,8 +781,18 @@ Construct a seasonality adjusted version of $log(totacc_t)$ by subtracting the e
 
 ```{r}
 
-?traffic2
+traffic2$ltotacc_adj <- coef(log_accident_model)['(Intercept)'] + (coef(log_accident_model)['t'] * traffic2$t) + resid(log_accident_model)
 
+plot(traffic2$t, traffic2$ltotacc, type = 'l', col = 'blue', lwd = 1.5,
+     ylab = 'log(Total Accidents)', xlab = 'Time (t)', 
+     main = 'Original vs Seasonally Adjusted log(totacc)')
+
+lines(traffic2$t, traffic2$ltotacc_adj, col = "red", lwd = 1.5, lty = 2)
+
+legend('bottom', inset = c(0, -0.4), 
+       legend = c('Original log(totacc)', 'Seasonally Adjusted'), 
+       col = c('blue', 'red'), lty = c(1, 2), lwd = 1.5, 
+       bty = 'n', xpd = TRUE, horiz = TRUE)
 ```
 
 ## Question (viii)
@@ -791,15 +801,64 @@ An alternative way of removing seasonality is seasonal differencing, $\Delta_{12
 
 ### Answer
 
+```{r}
+
+traffic2$ltotacc_sdiff <- c(rep(NA, 12), diff(traffic2$ltotacc, lag = 12))
+mean_sdiff <- mean(traffic2$ltotacc_sdiff, na.rm = TRUE)
+
+alpha_hat <- coef(log_accident_model)['t']
+twelve_alpha <- 12 * alpha_hat
+cat('sample mean of seasonal difference: ', mean_sdiff, '\n')
+cat('sample mean from OLS model: ', twelve_alpha, '\n')
+
+```
+
+After seasonal differencing of 12 on the dataset, we will lose 12 observations from this technique of removing seasonality. The sample mean of the seasonal differencing is different from the sample mean of the OLS model due to its nature of ignoring all of the data within the first and last observations of the sample. The seasonally differencing technique only measures the difference of the first and last data point as a linear line, not taking into account the rises and dips that can occur within those two data points. The OLS model uses every single data point in order to minimize the sum of squares residuals across every data point without bias. The difference in the sample means are products of the unique nature of each model.
+
 ## Question (ix)
 
-Apply the Hodrick-Prescott filter to the seasonally adjusted series from (vii), using the conventional monthly value $\lambda = 129600$ and also $\lambda = 1000$ (package mFilter). Compare the two HP cycles with the residuals from regressing the seasonally adjusted series on an interpcet and t (compute their standard deviations and their correlations). What do you conclude about the choice of $\lambda$?
+Apply the Hodrick-Prescott filter to the seasonally adjusted series from (vii), using the conventional monthly value $\lambda = 129600$ and also $\lambda = 1000$ (package mFilter). Compare the two HP cycles with the residuals from regressing the seasonally adjusted series on an intercept and t (compute their standard deviations and their correlations). What do you conclude about the choice of $\lambda$?
 
 ### Answer
 
+```{r}
+install.packages('mFilter')
+library(mFilter)
+
+monthly_hp_filter <- hpfilter(traffic2$ltotacc_adj,freq=129600,type=c("lambda","frequency"),drift=FALSE)
+
+yearly_hp_filter <- hpfilter(traffic2$ltotacc_adj,freq=1000,type=c("lambda","frequency"),drift=FALSE)
+
+monthly_cycle <- monthly_hp_filter$cycle
+yearly_cycle <- yearly_hp_filter$cycle
+
+t_index <- 1:nrow(traffic2)
+linear_model <- lm(traffic2$ltotacc_adj ~ t_index)
+linear_resid <- resid(linear_model)
+
+comparison_df <- data.frame(
+  HP_Monthly = as.numeric(monthly_cycle),
+  HP_Yearly = as.numeric(yearly_cycle),
+  Linear = as.numeric(linear_resid)
+)
+
+apply(comparison_df, 2, sd)
+cor(comparison_df)
+
+```
+
+After applying the Hodrick-Prescott method to the adjusted time series with our monthly and annual lambda values, we can see that the differing lambdas result in fairly differing standard deviations. The monthly lambda results in a std. dev. relative to the linear residuals with an extremely strong correlation. The larger the lambda, the 'stiffer' the trend becomes, essentially more linear. A lower value of lambda results in much less linearity, and thus more different std. dev. than the monthly adjusted time series and the linear. The yearly lambda gives us a smaller positive correlation with the monthly and linear with values of 0.7162229 and 0.6290042 respectively. The choice of lambda ultimately decides how aggressive you should target the seasonality or trend of the time series. If the time series is extremely seasonal, you should opt for a larger lambda value that penalizes shocks in the data more harshly. But if the seasonality is less common or in a smaller magnitude, choose a smaller lambda value. 
+ 
 ## Question (x)
 
 The accident data used here are not seasonally adjusted. Explain why this matters for the analysis above, and what could go wrong if you instead used an officially seasonally adjusted series together with monthly dummies.
 
-### Answer
+### Answer 
+
+If the data is not seasonally adjusted, when we apply a method like the Hodrick-Prescott filter, it has no ability to identify and negate seasonal patterns. Monthly dummies try and remove seasonality from the data, but it no longer exists.
+
+If you use an officially seasonally adjusted time series with monthly dummies, we are creating redundancy by trying to engineer features that try to capture aspects that no longer appear in the data. There is also the matter of increasing the degrees of freedom of a model that punishes the predictive power of any model. If we have a seasonally adjusted series, we are adding an extra 11 degrees of freedom from our monthly dummies that could raise the SEs of all variables changing their p-values.
+
+
+
 
